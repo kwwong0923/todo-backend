@@ -38,7 +38,7 @@ const mongoSanitize = require("express-mongo-sanitize");
 const connectDB = require("./db/connect");
 
 // Router
-const { authRouter, userRouter } = require("./routes");
+const { authRouter, userRouter, taskRouter } = require("./routes");
 // Error Handler
 const { notFoundMiddleware, errorHandlerMiddleware } = require("./middlewares");
 // ---------- Middleware----------
@@ -68,6 +68,7 @@ app.get("/api/", (req, res) => {
 
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
+app.use("/api/task", taskRouter);
 
 // Routes - Not Found
 app.use(notFoundMiddleware);
