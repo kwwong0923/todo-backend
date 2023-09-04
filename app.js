@@ -47,16 +47,21 @@ const { notFoundMiddleware, errorHandlerMiddleware } = require("./middlewares");
 // For front end and back end don't stand on the same domain
 app.use(cors());
 
+// Static Folder Location
+app.use(express.static("./public"));
+
 // JSON
 // Read the json format from http request
 app.use(express.json());
 
+// File Uploading
+// The file won't be saved in local
+// There is only a temporary path
+app.use(fileUpload({ useTempFiles: true }));
+
 // Cookie
 // cookie will be appeared inside of req.cookie or req.signedCookie
 app.use(cookieParser(process.env.COOKIE_SECRET));
-
-// Static Folder Location
-app.use(express.static("./public"));
 
 // Logger: display req info on the console
 app.use(morgan("tiny"));

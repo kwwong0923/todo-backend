@@ -12,7 +12,7 @@ const TaskSchema = new mongoose.Schema(
       maxlength: 100,
     },
     category: {
-      type: [String],
+      type: String,
       enum: ["working", "learning", "friends", "event", "personal"],
       default: "personal",
     },

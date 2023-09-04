@@ -105,20 +105,18 @@ const login = async (req, res) => {
 
   // Creating a token user that only contains certain data (No Password)
   const tokenUser = createTokenUser(user);
-  console.log(`tokenUser: \n${tokenUser}`);
 
   // Creating refresh token
   let refreshToken = "";
   // Check if the token existing: user._id
   const existingToken = await Token.findOne({ user: user._id });
-
+  console.log(existingToken);
   if (existingToken) {
     if (!existingToken.isValid) {
       throw new CustomError.UnauthenticatedError("Invalid Credentials");
     }
-
     refreshToken = existingToken.refreshToken;
-    attachCookiesToResponse({ req, user: tokenUser, refreshToken });
+    attachCookiesToResponse({ res, user: tokenUser, refreshToken });
     return res.status(StatusCodes.OK).json({ user: tokenUser });
   }
 
@@ -192,21 +190,24 @@ const resetPassword = async (req, res) => {
     throw new CustomError.BadRequestError("Please provide all values");
   }
 
-  const user = await User.findOne({email});
+  const user = await User.findOne({ email });
 
   if (!user) {
     throw new CustomError.NotFoundError("No User Found");
   }
 
   const currentDate = new Date();
-  if ( user.passwordToken === createHash(token) && user.passwordTokenExpirationDate > currentDate) {
+  if (
+    user.passwordToken === createHash(token) &&
+    user.passwordTokenExpirationDate > currentDate
+  ) {
     user.password = password;
     user.passwordToken = null;
     user.passwordTokenExpirationDate = null;
     await user.save();
   }
 
-  res.status(StatusCodes.OK).json({message: "Password reset"});
+  res.status(StatusCodes.OK).json({ message: "Password reset" });
 };
 
 module.exports = {
