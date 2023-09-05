@@ -8,4 +8,5 @@ module.exports = {
   errorHandlerMiddleware: require("./error-handler-middleware"),
   authenticateUser,
   authorizePermissions,
+  passportGoogleMiddleware: require("./passport-google-middleware"),
 };

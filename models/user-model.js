@@ -20,13 +20,15 @@ const UserSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, "Please provide password"],
     minlength: 6,
   },
   role: {
     type: String,
     enum: ["admin", "user"],
     default: "user",
+  },
+  googleId: {
+    type: String
   },
   // Verification of Registration
   verificationToken: String,

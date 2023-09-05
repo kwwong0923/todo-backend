@@ -22,7 +22,35 @@ const createTask = async (req, res) => {
 
 const getAllTasks = async (req, res) => {
   const { userId } = req.user;
-  const tasks = await Task.find({ user: userId });
+  const { category, status, keyword, sort } = req.params;
+  let queryObject = { user: userId };
+  // Keyword searching
+  if (keyword) {
+    queryObject.$or = [
+      { title: { $regex: keyword, $option: "i" } },
+      { content: { $regex: keyword, $option: "i" } },
+    ];
+  }
+  // Filtering Category
+  if (category) queryObject.category = { $regex: category, $option: "i" };
+  if (status) queryObject.status = status;
+
+  // Sorting new to old, or old to new
+  // default new to old
+  const sortMethod = "-createAt";
+  if (sort === "old") {
+    sort = "createAt";
+  }
+
+  // Pagination
+  const page = req.query.page || 1;
+  const limit = req.query.limit || 10;
+  const skip = (page - 1) * limit;
+
+  const tasks = await Task.find(queryObject)
+    .sort(sortMethod)
+    .limit(limit)
+    .skip(skip);
 
   return res.status(StatusCodes.OK).json({ tasks, count: tasks.length });
 };

@@ -210,6 +210,53 @@ const resetPassword = async (req, res) => {
   res.status(StatusCodes.OK).json({ message: "Password reset" });
 };
 
+const googleLogin = async (req, res) => {
+
+  const tokenUser = createTokenUser(req.user);
+  let refreshToken = "";
+  // req.user already is tokenUser, it's set in passport
+  const existingToken = await Token.findOne({ user: tokenUser.userId });
+  if (existingToken) {
+    if (!existingToken.isValid) {
+      throw new CustomError.UnauthenticatedError("Invalid Credentials");
+    }
+    refreshToken = existingToken.refreshToken;
+    attachCookiesToResponse({ res, user: tokenUser, refreshToken });
+    return res.status(StatusCodes.OK).redirect(process.env.REDIRECT_URL);
+  }
+  refreshToken = crypto.randomBytes(40).toString("hex");
+  const userAgent = req.headers["user-agent"];
+  const ip = req.ip;
+  const userToken = { refreshToken, userAgent, ip, user: tokenUser.userId };
+  await Token.create(userToken);
+  attachCookiesToResponse({ res, user: tokenUser, refreshToken });
+
+  return res.status(StatusCodes.OK).redirect(process.env.REDIRECT_URL);
+};
+
+// const googleLogin = async (req, res) => {
+//   console.log(req.user);
+//   let refreshToken = "";
+//   // req.user already is tokenUser, it's set in passport
+//   const existingToken = await Token.findOne({ user: req.user.userId });
+//   if (existingToken) {
+//     if (!existingToken.isValid) {
+//       throw new CustomError.UnauthenticatedError("Invalid Credentials");
+//     }
+//     refreshToken = existingToken.refreshToken;
+//     attachCookiesToResponse({ res, user: req.user, refreshToken });
+//     return res.status(StatusCodes.OK).redirect(process.env.REDIRECT_URL);
+//   }
+//   refreshToken = crypto.randomBytes(40).toString("hex");
+//   const userAgent = req.headers["user-agent"];
+//   const ip = req.ip;
+//   const userToken = { refreshToken, userAgent, ip, user: req.user.userId };
+//   await Token.create(userToken);
+//   attachCookiesToResponse({ res, user: req.user, refreshToken });
+
+//   return res.status(StatusCodes.OK).redirect(process.env.REDIRECT_URL);
+// };
+
 module.exports = {
   register,
   login,
@@ -217,4 +264,5 @@ module.exports = {
   verifyEmail,
   forgotPassword,
   resetPassword,
+  googleLogin,
 };
